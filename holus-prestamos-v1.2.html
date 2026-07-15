@@ -1,0 +1,1217 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<title>Holus · Préstamos a Empleados</title>
+<style>
+  :root{
+    --navy:#1e3a5f;
+    --navy-dark:#152943;
+    --teal:#0f9b8e;
+    --teal-dark:#0b7d72;
+    --amber:#e0a458;
+    --red:#c0503e;
+    --bg:#f5f7fa;
+    --card:#ffffff;
+    --border:#e2e8f0;
+    --text:#1f2937;
+    --text-mute:#6b7280;
+    --shadow:0 1px 3px rgba(15,23,42,0.08), 0 1px 2px rgba(15,23,42,0.04);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    -webkit-font-smoothing:antialiased;
+  }
+  header{
+    background:var(--navy);
+    color:#fff;
+    padding:16px 20px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:10px;
+  }
+  header h1{
+    margin:0;
+    font-size:19px;
+    font-weight:600;
+    letter-spacing:.2px;
+  }
+  header h1 span{
+    display:block;
+    font-size:12px;
+    font-weight:400;
+    color:#b7c6da;
+    margin-top:2px;
+  }
+  .drive-controls{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+    align-items:center;
+  }
+  .drive-status{
+    font-size:12px;
+    color:#b7c6da;
+    margin-right:4px;
+  }
+  button{
+    font-family:inherit;
+    cursor:pointer;
+    border:none;
+    border-radius:6px;
+    padding:8px 14px;
+    font-size:13px;
+    font-weight:600;
+    transition:opacity .15s ease, transform .1s ease;
+  }
+  button:active{transform:scale(0.98);}
+  button.primary{background:var(--teal); color:#fff;}
+  button.primary:hover{background:var(--teal-dark);}
+  button.ghost{background:rgba(255,255,255,0.12); color:#fff;}
+  button.ghost:hover{background:rgba(255,255,255,0.22);}
+  button.outline{background:#fff; color:var(--navy); border:1px solid var(--border);}
+  button.outline:hover{background:#f0f3f7;}
+  button.small{padding:5px 10px; font-size:12px; border-radius:5px;}
+  button.danger{background:#fdeceb; color:var(--red);}
+  button.danger:hover{background:#fbdcd9;}
+  button:disabled{opacity:.5; cursor:not-allowed;}
+
+  nav{
+    display:flex;
+    background:#fff;
+    border-bottom:1px solid var(--border);
+    padding:0 20px;
+    gap:4px;
+    overflow-x:auto;
+  }
+  nav button.tab{
+    background:none;
+    border-radius:0;
+    padding:12px 16px;
+    font-size:13px;
+    color:var(--text-mute);
+    border-bottom:2px solid transparent;
+    white-space:nowrap;
+  }
+  nav button.tab.active{
+    color:var(--navy);
+    border-bottom-color:var(--teal);
+  }
+
+  main{
+    padding:20px;
+    max-width:1200px;
+    margin:0 auto;
+  }
+  .view{display:none;}
+  .view.active{display:block;}
+
+  .card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:10px;
+    box-shadow:var(--shadow);
+    padding:18px;
+    margin-bottom:18px;
+  }
+  .card h2{
+    margin:0 0 14px 0;
+    font-size:15px;
+    font-weight:700;
+    color:var(--navy);
+  }
+  .card h3{
+    margin:0 0 10px 0;
+    font-size:13px;
+    font-weight:700;
+    color:var(--text-mute);
+    text-transform:uppercase;
+    letter-spacing:.4px;
+  }
+
+  .form-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+    gap:12px;
+    margin-bottom:14px;
+  }
+  label{
+    display:block;
+    font-size:12px;
+    font-weight:600;
+    color:var(--text-mute);
+    margin-bottom:5px;
+  }
+  input,select{
+    width:100%;
+    padding:8px 10px;
+    border:1px solid var(--border);
+    border-radius:6px;
+    font-size:14px;
+    font-family:inherit;
+    background:#fff;
+    color:var(--text);
+  }
+  input:focus,select:focus{
+    outline:none;
+    border-color:var(--teal);
+    box-shadow:0 0 0 3px rgba(15,155,142,0.12);
+  }
+
+  .kpi-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
+    gap:12px;
+    margin-bottom:18px;
+  }
+  .kpi{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:16px;
+    box-shadow:var(--shadow);
+  }
+  .kpi .label{font-size:12px; color:var(--text-mute); font-weight:600; text-transform:uppercase; letter-spacing:.3px;}
+  .kpi .value{font-size:22px; font-weight:700; color:var(--navy); margin-top:6px;}
+  .kpi.teal .value{color:var(--teal-dark);}
+  .kpi.amber .value{color:#a3712c;}
+
+  table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:13px;
+  }
+  th,td{
+    text-align:left;
+    padding:9px 10px;
+    border-bottom:1px solid var(--border);
+    white-space:nowrap;
+  }
+  th{
+    background:#f8fafc;
+    color:var(--text-mute);
+    font-weight:700;
+    font-size:11.5px;
+    text-transform:uppercase;
+    letter-spacing:.3px;
+    position:sticky;
+    top:0;
+  }
+  .table-wrap{
+    overflow-x:auto;
+    border:1px solid var(--border);
+    border-radius:8px;
+  }
+  tr:hover td{background:#fafbfd;}
+
+  .badge{
+    display:inline-block;
+    padding:3px 9px;
+    border-radius:20px;
+    font-size:11px;
+    font-weight:700;
+  }
+  .badge.pendiente{background:#fdf2e0; color:#a3712c;}
+  .badge.pagado{background:#e3f6f0; color:var(--teal-dark);}
+  .badge.parcial{background:#e7edf9; color:var(--navy);}
+  .badge.vencido{background:#fdeceb; color:var(--red);}
+  .badge.activo{background:#e3f6f0; color:var(--teal-dark);}
+  .badge.inactivo{background:#f0f1f3; color:var(--text-mute);}
+
+  .row-actions{display:flex; gap:6px;}
+  .empty{
+    text-align:center;
+    padding:30px 10px;
+    color:var(--text-mute);
+    font-size:13px;
+  }
+  .toolbar{
+    display:flex;
+    gap:10px;
+    align-items:flex-end;
+    flex-wrap:wrap;
+    margin-bottom:14px;
+  }
+  .toolbar .field{min-width:160px;}
+  .muted{color:var(--text-mute); font-size:12px;}
+  details{margin-top:6px;}
+  details summary{cursor:pointer; font-size:12.5px; color:var(--teal-dark); font-weight:600; padding:4px 0;}
+  .toast{
+    position:fixed;
+    bottom:20px;
+    left:50%;
+    transform:translateX(-50%) translateY(10px);
+    background:var(--navy-dark);
+    color:#fff;
+    padding:10px 18px;
+    border-radius:8px;
+    font-size:13px;
+    box-shadow:0 4px 14px rgba(0,0,0,0.2);
+    opacity:0;
+    pointer-events:none;
+    transition:all .25s ease;
+    z-index:999;
+  }
+  .toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
+  .modal-bg{
+    position:fixed; inset:0; background:rgba(15,23,42,0.4);
+    display:none; align-items:center; justify-content:center; z-index:900; padding:16px;
+  }
+  .modal-bg.show{display:flex;}
+  .modal{
+    background:#fff; border-radius:10px; padding:20px; max-width:420px; width:100%;
+    box-shadow:0 10px 40px rgba(0,0,0,0.2);
+  }
+  .modal h3{margin:0 0 10px; font-size:15px; color:var(--navy);}
+  .modal p{font-size:13px; color:var(--text-mute); margin:0 0 16px;}
+  .modal .actions{display:flex; gap:8px; justify-content:flex-end;}
+
+  @media (max-width:600px){
+    header{padding:12px 14px;}
+    main{padding:12px;}
+    nav{padding:0 8px;}
+    th,td{padding:8px 8px; font-size:12.5px;}
+  }
+
+  /* ---- Login / bloqueo de acceso ---- */
+  #loginGate{
+    position:fixed; inset:0; background:var(--navy);
+    display:flex; align-items:center; justify-content:center;
+    z-index:2000; padding:20px;
+  }
+  #loginGate .box{
+    background:#fff; border-radius:14px; padding:36px 30px;
+    max-width:380px; width:100%; text-align:center;
+    box-shadow:0 12px 40px rgba(0,0,0,0.3);
+  }
+  #loginGate h2{margin:0 0 6px; font-size:18px; color:var(--navy);}
+  #loginGate p{margin:0 0 22px; font-size:13px; color:var(--text-mute); line-height:1.5;}
+  #loginGate .g-btn{
+    display:inline-flex; align-items:center; gap:10px;
+    background:#fff; border:1px solid var(--border); border-radius:8px;
+    padding:10px 18px; font-size:14px; font-weight:600; color:var(--text);
+    cursor:pointer; box-shadow:var(--shadow);
+  }
+  #loginGate .g-btn:hover{background:#f7f9fb;}
+  #loginGate .denied{
+    display:none; margin-top:18px; background:#fdeceb; color:var(--red);
+    border-radius:8px; padding:12px 14px; font-size:13px; text-align:left;
+  }
+  #loginGate .denied.show{display:block;}
+  #loginGate .loading{font-size:12.5px; color:var(--text-mute); margin-top:14px;}
+  #appWrapper{display:none;}
+  .user-chip{
+    display:flex; align-items:center; gap:8px;
+    background:rgba(255,255,255,0.12); border-radius:20px;
+    padding:4px 10px 4px 4px; font-size:12.5px; color:#fff;
+  }
+  .user-chip img{width:22px; height:22px; border-radius:50%;}
+  .sync-dot{width:7px; height:7px; border-radius:50%; background:#8fd6c8; display:inline-block; margin-right:5px;}
+  .sync-dot.syncing{background:var(--amber);}
+
+  #linkGate{
+    position:fixed; inset:0; background:rgba(15,23,42,0.45);
+    display:none; align-items:center; justify-content:center;
+    z-index:1500; padding:20px;
+  }
+  #linkGate.show{display:flex;}
+  #linkGate .box{
+    background:#fff; border-radius:14px; padding:30px 26px;
+    max-width:420px; width:100%; box-shadow:0 12px 40px rgba(0,0,0,0.3);
+  }
+  #linkGate h3{margin:0 0 8px; font-size:16px; color:var(--navy);}
+  #linkGate p{margin:0 0 18px; font-size:13px; color:var(--text-mute); line-height:1.5;}
+  #linkGate .actions{display:flex; flex-direction:column; gap:10px;}
+</style>
+</head>
+<body>
+
+<div id="linkGate">
+  <div class="box">
+    <h3>Vincula el respaldo de Drive</h3>
+    <p>No encontramos un respaldo accesible con esta cuenta todavía. Si Juan Pablo ya creó y compartió <strong>holus_prestamos_backup.json</strong> contigo, selecciónalo. Si es la primera vez que se usa la app, crea el respaldo.</p>
+    <div class="actions">
+      <button class="primary" id="btn-link-picker">Seleccionar archivo compartido en Drive</button>
+      <button class="outline" id="btn-link-crear">Crear respaldo nuevo (primera vez)</button>
+    </div>
+  </div>
+</div>
+
+<div id="loginGate">
+  <div class="box">
+    <h2>Holus · Préstamos a Empleados</h2>
+    <p>Acceso restringido al equipo autorizado. Inicia sesión con tu cuenta de Google para continuar.</p>
+    <button class="g-btn" id="btn-login">
+      <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.9c1.7-1.57 2.7-3.88 2.7-6.62z"/><path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.9-2.26c-.8.54-1.84.86-3.06.86-2.35 0-4.34-1.59-5.05-3.72H.98v2.33A9 9 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.95 10.7A5.4 5.4 0 0 1 3.67 9c0-.59.1-1.17.28-1.7V4.97H.98A9 9 0 0 0 0 9c0 1.45.35 2.83.98 4.03l2.97-2.33z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58C13.46.9 11.43 0 9 0A9 9 0 0 0 .98 4.97L3.95 7.3C4.66 5.17 6.65 3.58 9 3.58z"/></svg>
+      Iniciar sesión con Google
+    </button>
+    <div class="loading" id="loginLoading" style="display:none;">Verificando acceso…</div>
+    <div class="denied" id="loginDenied">Este correo no tiene acceso a Holus Préstamos. Contacta a Juan Pablo si crees que esto es un error.</div>
+  </div>
+</div>
+
+<div id="appWrapper">
+<header>
+  <h1>Holus · Préstamos a Empleados<span>Registro, cobranza y reportes de préstamos internos</span></h1>
+  <div class="drive-controls" id="driveControls">
+    <span class="drive-status"><span class="sync-dot" id="syncDot"></span><span id="syncText">Sincronizado</span></span>
+    <span class="user-chip" id="userChip"></span>
+    <button class="ghost small" id="btn-logout">Cerrar sesión</button>
+  </div>
+</header>
+
+<nav>
+  <button class="tab active" data-view="prestamos">Préstamos</button>
+  <button class="tab" data-view="cobranza">Cobranza</button>
+  <button class="tab" data-view="reportes">Reportes</button>
+  <button class="tab" data-view="inactivos">Inactivos</button>
+</nav>
+
+<main>
+
+  <!-- ================= PRÉSTAMOS ================= -->
+  <div class="view active" id="view-prestamos">
+    <div class="card">
+      <h2>Nuevo préstamo</h2>
+      <div class="form-grid">
+        <div>
+          <label>Nombre de empleado</label>
+          <input type="text" id="f-empleado" placeholder="Ej. Juan Pérez">
+        </div>
+        <div>
+          <label>Monto del préstamo</label>
+          <input type="number" id="f-monto" placeholder="0.00" step="0.01" min="0">
+        </div>
+        <div>
+          <label>Número de pagos</label>
+          <input type="number" id="f-numpagos" placeholder="Ej. 8" min="1" step="1">
+        </div>
+        <div>
+          <label>Interés total (%)</label>
+          <input type="number" id="f-interes" placeholder="Ej. 10" step="0.01" min="0">
+        </div>
+        <div>
+          <label>Frecuencia de cobro</label>
+          <select id="f-frecuencia">
+            <option value="semanal">Semanal</option>
+            <option value="quincenal">Quincenal</option>
+            <option value="mensual">Mensual</option>
+          </select>
+        </div>
+        <div>
+          <label>Fecha del préstamo</label>
+          <input type="date" id="f-fecha">
+        </div>
+        <div>
+          <label>Día de descuento/cobro (opcional)</label>
+          <input type="text" id="f-diacobro" placeholder="Ej. Viernes de nómina">
+        </div>
+      </div>
+      <button class="primary" id="btn-agregar-prestamo">+ Agregar préstamo</button>
+    </div>
+
+    <div class="card">
+      <h2>Préstamos activos</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Empleado</th>
+              <th>Fecha</th>
+              <th>Monto</th>
+              <th>Interés</th>
+              <th>Total a pagar</th>
+              <th>Pagos</th>
+              <th>Frecuencia</th>
+              <th>Cobrado</th>
+              <th>Saldo</th>
+              <th>Estado</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="tbody-prestamos"></tbody>
+        </table>
+      </div>
+      <div class="empty" id="empty-prestamos" style="display:none;">Aún no hay préstamos registrados.</div>
+    </div>
+  </div>
+
+  <!-- ================= COBRANZA ================= -->
+  <div class="view" id="view-cobranza">
+    <div class="card">
+      <h2>Formato de cobranza</h2>
+      <p class="muted" style="margin-top:-8px;">Muestra los pagos programados hasta la fecha seleccionada. Marca lo cobrado; si alguien no pagó, déjalo pendiente o edita el monto.</p>
+      <div class="toolbar">
+        <div class="field">
+          <label>Mostrar pagos con fecha hasta</label>
+          <input type="date" id="cob-fecha">
+        </div>
+        <div class="field" style="max-width:220px;">
+          <label>Filtrar empleado</label>
+          <input type="text" id="cob-filtro" placeholder="Todos">
+        </div>
+        <button class="outline small" id="btn-cob-hoy">Hoy</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Empleado</th>
+              <th># Pago</th>
+              <th>Fecha prog.</th>
+              <th>Monto prog.</th>
+              <th>Estado</th>
+              <th>Fecha real</th>
+              <th>Monto cobrado</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="tbody-cobranza"></tbody>
+        </table>
+      </div>
+      <div class="empty" id="empty-cobranza" style="display:none;">No hay cobros pendientes en este rango.</div>
+    </div>
+  </div>
+
+  <!-- ================= REPORTES ================= -->
+  <div class="view" id="view-reportes">
+    <div class="kpi-grid">
+      <div class="kpi">
+        <div class="label">Total prestado</div>
+        <div class="value" id="kpi-prestado">$0.00</div>
+      </div>
+      <div class="kpi teal">
+        <div class="label">Total cobrado</div>
+        <div class="value" id="kpi-cobrado">$0.00</div>
+      </div>
+      <div class="kpi amber">
+        <div class="label">Interés generado (cobrado)</div>
+        <div class="value" id="kpi-interes">$0.00</div>
+      </div>
+      <div class="kpi">
+        <div class="label">Saldo pendiente total</div>
+        <div class="value" id="kpi-saldo">$0.00</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Resumen por empleado</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Empleado</th>
+              <th>Préstamos</th>
+              <th>Prestado</th>
+              <th>Cobrado</th>
+              <th>Interés cobrado</th>
+              <th>Saldo</th>
+            </tr>
+          </thead>
+          <tbody id="tbody-reportes"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= INACTIVOS ================= -->
+  <div class="view" id="view-inactivos">
+    <div class="card">
+      <h2>Préstamos liquidados / inactivos</h2>
+      <p class="muted" style="margin-top:-8px;">Se inactivan automáticamente cuando el saldo llega a $0.00.</p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Empleado</th>
+              <th>Fecha</th>
+              <th>Monto</th>
+              <th>Total pagado</th>
+              <th>Interés generado</th>
+              <th>Liquidado</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="tbody-inactivos"></tbody>
+        </table>
+      </div>
+      <div class="empty" id="empty-inactivos" style="display:none;">Todavía no hay préstamos liquidados.</div>
+    </div>
+  </div>
+
+</main>
+
+<div class="toast" id="toast"></div>
+
+<div class="modal-bg" id="modalBg">
+  <div class="modal">
+    <h3 id="modalTitle">Confirmar</h3>
+    <p id="modalText"></p>
+    <div class="actions">
+      <button class="outline small" id="modalCancel">Cancelar</button>
+      <button class="danger small" id="modalConfirm">Eliminar</button>
+    </div>
+  </div>
+</div>
+
+</div><!-- /appWrapper -->
+
+<script>
+/* =========================================================
+   HOLUS · PRÉSTAMOS A EMPLEADOS — v1.0
+   Almacenamiento: localStorage + respaldo opcional a Google Drive
+   ========================================================= */
+
+const STORAGE_KEY = 'holus_prestamos_data_v1';
+const DRIVE_FILE_NAME = 'holus_prestamos_backup.json';
+
+// ---- CONFIGURA AQUÍ tu Client ID de Google Cloud (mismo proyecto "Holus CxC",
+// agregando este dominio como origen autorizado, o uno nuevo) ----
+const GOOGLE_CLIENT_ID = '836296416493-7ljfu4np2r9cg2k3c935qomkcj2abnkr.apps.googleusercontent.com';
+const GOOGLE_API_KEY = 'AIzaSyCh2YdmYSMblAtVpP18C3YkYsjXOqYMcss'; // solo para el selector (Picker) de Drive
+const DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.file';
+
+let DATA = { prestamos: [] };
+let tokenClient = null;
+let accessToken = null;
+let driveFileId = null;
+
+// ---------- Utilidades ----------
+function uid(){ return 'p' + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+function money(n){ return '$' + (Number(n)||0).toLocaleString('es-MX',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function todayISO(){ const d=new Date(); return d.toISOString().slice(0,10); }
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(window.__toastTimer);
+  window.__toastTimer = setTimeout(()=>t.classList.remove('show'), 2600);
+}
+function fmtDate(iso){
+  if(!iso) return '—';
+  const [y,m,d] = iso.split('-');
+  return `${d}/${m}/${y}`;
+}
+function addDias(iso, dias){
+  const d = new Date(iso + 'T00:00:00');
+  d.setDate(d.getDate() + dias);
+  return d.toISOString().slice(0,10);
+}
+function addMeses(iso, meses){
+  const d = new Date(iso + 'T00:00:00');
+  d.setMonth(d.getMonth() + meses);
+  return d.toISOString().slice(0,10);
+}
+function siguienteFecha(iso, frecuencia){
+  if(frecuencia === 'semanal') return addDias(iso, 7);
+  if(frecuencia === 'quincenal') return addDias(iso, 15);
+  return addMeses(iso, 1); // mensual
+}
+
+// ---------- Persistencia local ----------
+function loadData(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    DATA = raw ? JSON.parse(raw) : { prestamos: [] };
+  }catch(e){
+    console.error('Error cargando datos', e);
+    DATA = { prestamos: [] };
+  }
+}
+function saveData(){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(DATA));
+  renderAll();
+  programarSync();
+}
+
+// ---------- Lógica de préstamos ----------
+function calcularPrestamo(p){
+  const interesTotal = round2(p.monto * (p.interesPct/100));
+  const totalAPagar = round2(p.monto + interesTotal);
+  return { interesTotal, totalAPagar };
+}
+function round2(n){ return Math.round((n + Number.EPSILON) * 100) / 100; }
+
+function generarCalendario(p){
+  const { interesTotal, totalAPagar } = calcularPrestamo(p);
+  const capitalPorPago = round2(p.monto / p.numPagos);
+  const interesPorPago = round2(interesTotal / p.numPagos);
+  let pagos = [];
+  let fecha = p.fecha;
+  let sumaCapital = 0, sumaInteres = 0;
+  for(let i=1; i<=p.numPagos; i++){
+    fecha = siguienteFecha(fecha, p.frecuencia);
+    let capital = capitalPorPago;
+    let interes = interesPorPago;
+    if(i === p.numPagos){
+      // ajustar el último pago para evitar residuos de redondeo
+      capital = round2(p.monto - sumaCapital);
+      interes = round2(interesTotal - sumaInteres);
+    }
+    sumaCapital += capital;
+    sumaInteres += interes;
+    pagos.push({
+      numero: i,
+      fechaProgramada: fecha,
+      capitalProgramado: capital,
+      interesProgramado: interes,
+      montoProgramado: round2(capital + interes),
+      estado: 'pendiente', // pendiente | pagado | parcial
+      fechaPago: null,
+      montoPagado: 0
+    });
+  }
+  return pagos;
+}
+
+function saldoPrestamo(p){
+  const { totalAPagar } = calcularPrestamo(p);
+  const cobrado = p.pagos.reduce((s,pg)=> s + (Number(pg.montoPagado)||0), 0);
+  return { totalAPagar, cobrado: round2(cobrado), saldo: round2(totalAPagar - cobrado) };
+}
+
+function interesCobradoPrestamo(p){
+  return round2(p.pagos.reduce((s,pg)=>{
+    if(!pg.montoProgramado) return s;
+    const prop = Math.min(1, (Number(pg.montoPagado)||0) / pg.montoProgramado);
+    return s + prop * pg.interesProgramado;
+  }, 0));
+}
+
+function actualizarEstadoPagos(p){
+  p.pagos.forEach(pg=>{
+    if((Number(pg.montoPagado)||0) <= 0){ pg.estado = 'pendiente'; }
+    else if(pg.montoPagado >= pg.montoProgramado - 0.005){ pg.estado = 'pagado'; }
+    else { pg.estado = 'parcial'; }
+  });
+  const { saldo } = saldoPrestamo(p);
+  p.activo = saldo > 0.01;
+  if(!p.activo && !p.fechaLiquidado){ p.fechaLiquidado = todayISO(); }
+  if(p.activo){ p.fechaLiquidado = null; }
+}
+
+// ---------- Agregar préstamo ----------
+document.getElementById('btn-agregar-prestamo').addEventListener('click', ()=>{
+  const empleado = document.getElementById('f-empleado').value.trim();
+  const monto = parseFloat(document.getElementById('f-monto').value);
+  const numPagos = parseInt(document.getElementById('f-numpagos').value);
+  const interesPct = parseFloat(document.getElementById('f-interes').value) || 0;
+  const frecuencia = document.getElementById('f-frecuencia').value;
+  const fecha = document.getElementById('f-fecha').value || todayISO();
+  const diaCobro = document.getElementById('f-diacobro').value.trim();
+
+  if(!empleado){ toast('Escribe el nombre del empleado'); return; }
+  if(!monto || monto <= 0){ toast('Escribe un monto válido'); return; }
+  if(!numPagos || numPagos <= 0){ toast('Escribe el número de pagos'); return; }
+
+  const p = {
+    id: uid(),
+    empleado, monto, numPagos, interesPct, frecuencia, fecha, diaCobro,
+    activo: true,
+    fechaLiquidado: null,
+    pagos: []
+  };
+  p.pagos = generarCalendario(p);
+  DATA.prestamos.push(p);
+  saveData();
+
+  ['f-empleado','f-monto','f-numpagos','f-interes','f-diacobro'].forEach(id=>document.getElementById(id).value='');
+  toast('Préstamo agregado');
+});
+
+// ---------- Render: Préstamos ----------
+function renderPrestamos(){
+  const tbody = document.getElementById('tbody-prestamos');
+  const activos = DATA.prestamos.filter(p=>p.activo);
+  tbody.innerHTML = '';
+  document.getElementById('empty-prestamos').style.display = activos.length ? 'none' : 'block';
+
+  activos.forEach(p=>{
+    const { totalAPagar, cobrado, saldo } = saldoPrestamo(p);
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><strong>${escapeHtml(p.empleado)}</strong>${p.diaCobro?`<br><span class="muted">${escapeHtml(p.diaCobro)}</span>`:''}</td>
+      <td>${fmtDate(p.fecha)}</td>
+      <td>${money(p.monto)}</td>
+      <td>${p.interesPct}%</td>
+      <td>${money(totalAPagar)}</td>
+      <td>${p.numPagos}</td>
+      <td style="text-transform:capitalize">${p.frecuencia}</td>
+      <td>${money(cobrado)}</td>
+      <td><strong>${money(saldo)}</strong></td>
+      <td><span class="badge activo">Activo</span></td>
+      <td class="row-actions">
+        <button class="outline small" onclick="verCalendario('${p.id}')">Calendario</button>
+        <button class="danger small" onclick="confirmarEliminar('${p.id}')">Eliminar</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+
+    const trDetail = document.createElement('tr');
+    trDetail.innerHTML = `<td colspan="11" style="padding:0; border-bottom:1px solid var(--border);">
+      <div id="cal-${p.id}" style="display:none; padding:10px 14px 16px;"></div>
+    </td>`;
+    tbody.appendChild(trDetail);
+  });
+}
+
+function verCalendario(id){
+  const box = document.getElementById('cal-'+id);
+  const visible = box.style.display === 'block';
+  document.querySelectorAll('[id^="cal-"]').forEach(el=>el.style.display='none');
+  if(visible) return;
+  const p = DATA.prestamos.find(x=>x.id===id);
+  let rows = p.pagos.map(pg=>`
+    <tr>
+      <td>#${pg.numero}</td>
+      <td>${fmtDate(pg.fechaProgramada)}</td>
+      <td>${money(pg.montoProgramado)}</td>
+      <td><span class="badge ${pg.estado}">${pg.estado}</span></td>
+      <td>${money(pg.montoPagado)}</td>
+      <td>${fmtDate(pg.fechaPago)}</td>
+    </tr>
+  `).join('');
+  box.innerHTML = `<div class="table-wrap"><table>
+    <thead><tr><th>#</th><th>Fecha prog.</th><th>Monto prog.</th><th>Estado</th><th>Pagado</th><th>Fecha pago</th></tr></thead>
+    <tbody>${rows}</tbody></table></div>`;
+  box.style.display = 'block';
+}
+
+let pendingDeleteId = null;
+function confirmarEliminar(id){
+  pendingDeleteId = id;
+  document.getElementById('modalTitle').textContent = 'Eliminar préstamo';
+  document.getElementById('modalText').textContent = 'Esta acción eliminará el préstamo y su calendario de pagos. No se puede deshacer. ¿Continuar?';
+  document.getElementById('modalBg').classList.add('show');
+}
+document.getElementById('modalCancel').addEventListener('click', ()=>{
+  document.getElementById('modalBg').classList.remove('show');
+  pendingDeleteId = null;
+});
+document.getElementById('modalConfirm').addEventListener('click', ()=>{
+  if(pendingDeleteId){
+    DATA.prestamos = DATA.prestamos.filter(p=>p.id!==pendingDeleteId);
+    saveData();
+    toast('Préstamo eliminado');
+  }
+  document.getElementById('modalBg').classList.remove('show');
+  pendingDeleteId = null;
+});
+
+// ---------- Render: Cobranza ----------
+function renderCobranza(){
+  const fechaLimite = document.getElementById('cob-fecha').value || todayISO();
+  const filtro = document.getElementById('cob-filtro').value.trim().toLowerCase();
+  const tbody = document.getElementById('tbody-cobranza');
+  tbody.innerHTML = '';
+
+  let items = [];
+  DATA.prestamos.filter(p=>p.activo).forEach(p=>{
+    if(filtro && !p.empleado.toLowerCase().includes(filtro)) return;
+    p.pagos.forEach(pg=>{
+      if(pg.estado==='pagado') return;
+      if(pg.fechaProgramada > fechaLimite) return;
+      items.push({p, pg});
+    });
+  });
+  items.sort((a,b)=> a.pg.fechaProgramada.localeCompare(b.pg.fechaProgramada));
+
+  document.getElementById('empty-cobranza').style.display = items.length ? 'none' : 'block';
+
+  items.forEach(({p,pg})=>{
+    const vencido = pg.fechaProgramada < todayISO();
+    const estadoBadge = vencido && pg.estado==='pendiente' ? 'vencido' : pg.estado;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><strong>${escapeHtml(p.empleado)}</strong></td>
+      <td>#${pg.numero}</td>
+      <td>${fmtDate(pg.fechaProgramada)}</td>
+      <td>${money(pg.montoProgramado)}</td>
+      <td><span class="badge ${estadoBadge}">${vencido && pg.estado==='pendiente' ? 'vencido' : pg.estado}</span></td>
+      <td><input type="date" value="${pg.fechaPago||''}" style="min-width:130px" onchange="editarPago('${p.id}',${pg.numero},'fecha',this.value)"></td>
+      <td><input type="number" step="0.01" value="${pg.montoPagado||''}" placeholder="0.00" style="min-width:100px" onchange="editarPago('${p.id}',${pg.numero},'monto',this.value)"></td>
+      <td class="row-actions">
+        <button class="primary small" onclick="marcarCobrado('${p.id}',${pg.numero})">Cobrado completo</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function editarPago(prestamoId, numero, campo, valor){
+  const p = DATA.prestamos.find(x=>x.id===prestamoId);
+  const pg = p.pagos.find(x=>x.numero===numero);
+  if(campo==='fecha') pg.fechaPago = valor || null;
+  if(campo==='monto') pg.montoPagado = parseFloat(valor) || 0;
+  if(pg.montoPagado > 0 && !pg.fechaPago) pg.fechaPago = todayISO();
+  actualizarEstadoPagos(p);
+  saveData();
+}
+
+function marcarCobrado(prestamoId, numero){
+  const p = DATA.prestamos.find(x=>x.id===prestamoId);
+  const pg = p.pagos.find(x=>x.numero===numero);
+  pg.montoPagado = pg.montoProgramado;
+  pg.fechaPago = pg.fechaPago || todayISO();
+  actualizarEstadoPagos(p);
+  saveData();
+  toast(p.activo ? 'Pago registrado' : `Préstamo de ${p.empleado} liquidado — pasó a Inactivos`);
+}
+
+// ---------- Render: Reportes ----------
+function renderReportes(){
+  let totalPrestado=0, totalCobrado=0, totalInteres=0, totalSaldo=0;
+  const porEmpleado = {};
+
+  DATA.prestamos.forEach(p=>{
+    const { totalAPagar, cobrado, saldo } = saldoPrestamo(p);
+    const interes = interesCobradoPrestamo(p);
+    totalPrestado += p.monto;
+    totalCobrado += cobrado;
+    totalInteres += interes;
+    totalSaldo += saldo;
+
+    if(!porEmpleado[p.empleado]) porEmpleado[p.empleado] = { prestamos:0, prestado:0, cobrado:0, interes:0, saldo:0 };
+    porEmpleado[p.empleado].prestamos += 1;
+    porEmpleado[p.empleado].prestado += p.monto;
+    porEmpleado[p.empleado].cobrado += cobrado;
+    porEmpleado[p.empleado].interes += interes;
+    porEmpleado[p.empleado].saldo += saldo;
+  });
+
+  document.getElementById('kpi-prestado').textContent = money(totalPrestado);
+  document.getElementById('kpi-cobrado').textContent = money(totalCobrado);
+  document.getElementById('kpi-interes').textContent = money(totalInteres);
+  document.getElementById('kpi-saldo').textContent = money(totalSaldo);
+
+  const tbody = document.getElementById('tbody-reportes');
+  tbody.innerHTML = '';
+  Object.entries(porEmpleado).sort((a,b)=>a[0].localeCompare(b[0])).forEach(([nombre, d])=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><strong>${escapeHtml(nombre)}</strong></td>
+      <td>${d.prestamos}</td>
+      <td>${money(d.prestado)}</td>
+      <td>${money(d.cobrado)}</td>
+      <td>${money(d.interes)}</td>
+      <td>${money(d.saldo)}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+// ---------- Render: Inactivos ----------
+function renderInactivos(){
+  const tbody = document.getElementById('tbody-inactivos');
+  const inactivos = DATA.prestamos.filter(p=>!p.activo);
+  tbody.innerHTML = '';
+  document.getElementById('empty-inactivos').style.display = inactivos.length ? 'none' : 'block';
+
+  inactivos.forEach(p=>{
+    const { cobrado } = saldoPrestamo(p);
+    const interes = interesCobradoPrestamo(p);
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><strong>${escapeHtml(p.empleado)}</strong></td>
+      <td>${fmtDate(p.fecha)}</td>
+      <td>${money(p.monto)}</td>
+      <td>${money(cobrado)}</td>
+      <td>${money(interes)}</td>
+      <td>${fmtDate(p.fechaLiquidado)}</td>
+      <td><button class="danger small" onclick="confirmarEliminar('${p.id}')">Eliminar</button></td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+
+function renderAll(){
+  renderPrestamos();
+  renderCobranza();
+  renderReportes();
+  renderInactivos();
+}
+
+// ---------- Tabs ----------
+document.querySelectorAll('nav .tab').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('nav .tab').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('view-'+btn.dataset.view).classList.add('active');
+  });
+});
+
+document.getElementById('cob-fecha').value = todayISO();
+document.getElementById('cob-fecha').addEventListener('change', renderCobranza);
+document.getElementById('cob-filtro').addEventListener('input', renderCobranza);
+document.getElementById('btn-cob-hoy').addEventListener('click', ()=>{
+  document.getElementById('cob-fecha').value = todayISO();
+  renderCobranza();
+});
+document.getElementById('f-fecha').value = todayISO();
+
+/* =========================================================
+   ACCESO — Google Sign-In + Drive compartido para todo el equipo
+   Requiere: reemplazar GOOGLE_CLIENT_ID arriba, servir por HTTPS,
+   y agregar cuevas.pablo@gmail.com / vmanomina@gmail.com como
+   "test users" en la pantalla de consentimiento OAuth (Google Cloud).
+   ========================================================= */
+const ALLOWED_EMAILS = ['cuevas.pablo@gmail.com', 'vmanomina@gmail.com'];
+const AUTH_SCOPE = 'openid email profile https://www.googleapis.com/auth/drive.file';
+const DRIVE_FILE_ID_CACHE_KEY = 'holus_prestamos_drive_file_id'; // recordar el archivo elegido, por navegador
+
+let currentUser = null;
+let syncTimer = null;
+
+function isHttps(){ return location.protocol === 'https:'; }
+
+function cargarGis(cb){
+  if(window.google && window.google.accounts){ cb(); return; }
+  const s = document.createElement('script');
+  s.src = 'https://accounts.google.com/gsi/client';
+  s.onload = cb;
+  document.head.appendChild(s);
+}
+
+document.getElementById('btn-login').addEventListener('click', iniciarSesion);
+document.getElementById('btn-logout').addEventListener('click', cerrarSesion);
+
+function iniciarSesion(){
+  if(!isHttps() && location.hostname !== 'localhost'){
+    toast('El inicio de sesión requiere HTTPS');
+    return;
+  }
+  if(GOOGLE_CLIENT_ID.includes('TU_CLIENT_ID')){
+    toast('Falta configurar GOOGLE_CLIENT_ID en el código');
+    return;
+  }
+  document.getElementById('loginLoading').style.display = 'block';
+  document.getElementById('loginDenied').classList.remove('show');
+  cargarGis(()=>{
+    tokenClient = google.accounts.oauth2.initTokenClient({
+      client_id: GOOGLE_CLIENT_ID,
+      scope: AUTH_SCOPE,
+      callback: async (resp)=>{
+        document.getElementById('loginLoading').style.display = 'none';
+        if(resp.error){ toast('No se pudo iniciar sesión'); return; }
+        accessToken = resp.access_token;
+        try{
+          const r = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+            headers: { Authorization: `Bearer ${accessToken}` }
+          });
+          const info = await r.json();
+          const email = (info.email || '').toLowerCase();
+          if(!ALLOWED_EMAILS.includes(email)){
+            document.getElementById('loginDenied').classList.add('show');
+            accessToken = null;
+            return;
+          }
+          currentUser = info;
+          await entrarAlSistema();
+        }catch(e){
+          console.error(e);
+          toast('Error verificando la cuenta');
+        }
+      }
+    });
+    tokenClient.requestAccessToken({ prompt: 'select_account' });
+  });
+}
+
+function cerrarSesion(){
+  if(accessToken){ google.accounts.oauth2.revoke(accessToken, ()=>{}); }
+  accessToken = null;
+  currentUser = null;
+  driveFileId = null;
+  document.getElementById('appWrapper').style.display = 'none';
+  document.getElementById('loginGate').style.display = 'flex';
+}
+
+async function entrarAlSistema(){
+  document.getElementById('loginGate').style.display = 'none';
+  document.getElementById('appWrapper').style.display = 'block';
+
+  const chip = document.getElementById('userChip');
+  chip.innerHTML = `${currentUser.picture ? `<img src="${currentUser.picture}">` : ''}<span>${escapeHtml(currentUser.email)}</span>`;
+
+  loadData(); // caché local mientras se sincroniza
+  renderAll();
+
+  setSyncStatus('syncing', 'Buscando respaldo…');
+  try{
+    // 1) ¿ya tenemos guardado el ID del archivo en este navegador?
+    driveFileId = localStorage.getItem(DRIVE_FILE_ID_CACHE_KEY) || null;
+    let encontrado = driveFileId ? await cargarDesdeDriveId(driveFileId) : false;
+
+    // 2) si no, busca archivos creados/abiertos por esta app con esta cuenta
+    if(!encontrado){
+      await buscarArchivoDrive();
+      encontrado = driveFileId ? await cargarDesdeDriveId(driveFileId) : false;
+    }
+
+    if(encontrado){
+      setSyncStatus('ok', 'Sincronizado');
+    } else {
+      // 3) no se encontró nada accesible con esta cuenta: pedir que elija o cree
+      setSyncStatus('error', 'Sin vincular');
+      mostrarVinculacionDrive();
+    }
+  }catch(e){
+    console.error(e);
+    setSyncStatus('error', 'Sin conexión a Drive — usando copia local');
+  }
+}
+
+async function cargarDesdeDriveId(fileId){
+  try{
+    const res = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
+      headers: { Authorization: `Bearer ${accessToken}` }
+    });
+    if(!res.ok) return false;
+    const json = await res.json();
+    DATA = json && json.prestamos ? json : { prestamos: [] };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(DATA));
+    localStorage.setItem(DRIVE_FILE_ID_CACHE_KEY, fileId);
+    renderAll();
+    return true;
+  }catch(e){
+    console.error(e);
+    return false;
+  }
+}
+
+function mostrarVinculacionDrive(){
+  const box = document.getElementById('linkGate');
+  box.classList.add('show');
+}
+
+document.getElementById('btn-link-picker').addEventListener('click', ()=>{
+  cargarPicker(mostrarPicker);
+});
+document.getElementById('btn-link-crear').addEventListener('click', async ()=>{
+  await guardarRespaldo(true);
+  if(driveFileId){
+    localStorage.setItem(DRIVE_FILE_ID_CACHE_KEY, driveFileId);
+    document.getElementById('linkGate').classList.remove('show');
+    setSyncStatus('ok', 'Sincronizado');
+    toast('Respaldo creado en Drive');
+  }
+});
+
+function cargarPicker(cb){
+  if(window.google && window.google.picker){ cb(); return; }
+  const s = document.createElement('script');
+  s.src = 'https://apis.google.com/js/api.js';
+  s.onload = ()=> gapi.load('picker', cb);
+  document.head.appendChild(s);
+}
+
+function mostrarPicker(){
+  const view = new google.picker.DocsView(google.picker.ViewId.DOCS)
+    .setMimeTypes('application/json')
+    .setIncludeFolders(true)
+    .setOwnedByMe(false);
+  const picker = new google.picker.PickerBuilder()
+    .addView(view)
+    .setOAuthToken(accessToken)
+    .setDeveloperKey(GOOGLE_API_KEY)
+    .setTitle('Selecciona el respaldo compartido (holus_prestamos_backup.json)')
+    .setCallback(async (data)=>{
+      if(data.action === google.picker.Action.PICKED){
+        const fileId = data.docs[0].id;
+        setSyncStatus('syncing', 'Cargando archivo…');
+        const ok = await cargarDesdeDriveId(fileId);
+        if(ok){
+          document.getElementById('linkGate').classList.remove('show');
+          setSyncStatus('ok', 'Sincronizado');
+          toast('Vinculado al respaldo compartido');
+        } else {
+          setSyncStatus('error', 'No se pudo leer ese archivo');
+          toast('No se pudo leer ese archivo');
+        }
+      }
+    })
+    .build();
+  picker.setVisible(true);
+}
+
+function setSyncStatus(state, text){
+  const dot = document.getElementById('syncDot');
+  const label = document.getElementById('syncText');
+  if(!dot) return;
+  dot.classList.toggle('syncing', state === 'syncing');
+  dot.style.background = state === 'error' ? 'var(--red)' : (state === 'syncing' ? 'var(--amber)' : '#8fd6c8');
+  label.textContent = text;
+}
+
+async function buscarArchivoDrive(){
+  const q = encodeURIComponent(`name='${DRIVE_FILE_NAME}' and trashed=false`);
+  const res = await fetch(`https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id,name)`, {
+    headers: { Authorization: `Bearer ${accessToken}` }
+  });
+  const json = await res.json();
+  if(json.files && json.files.length){ driveFileId = json.files[0].id; } else { driveFileId = null; }
+  return driveFileId;
+}
+
+async function guardarRespaldo(silencioso){
+  if(!accessToken) return;
+  try{
+    if(!driveFileId) await buscarArchivoDrive();
+    const contenido = JSON.stringify(DATA, null, 2);
+    const metadata = { name: DRIVE_FILE_NAME, mimeType: 'application/json' };
+    const boundary = '-------holusprestamos';
+    const body =
+      `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify(metadata)}\r\n` +
+      `--${boundary}\r\nContent-Type: application/json\r\n\r\n${contenido}\r\n--${boundary}--`;
+
+    const url = driveFileId
+      ? `https://www.googleapis.com/upload/drive/v3/files/${driveFileId}?uploadType=multipart&supportsAllDrives=true`
+      : `https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&supportsAllDrives=true`;
+
+    const res = await fetch(url, {
+      method: driveFileId ? 'PATCH' : 'POST',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': `multipart/related; boundary=${boundary}`
+      },
+      body
+    });
+    if(!res.ok) throw new Error('Fallo al subir');
+    const json = await res.json();
+    driveFileId = json.id;
+    if(!silencioso) toast('Respaldo guardado en Drive');
+  }catch(e){
+    console.error(e);
+    if(!silencioso) toast('Error al guardar el respaldo');
+    setSyncStatus('error', 'Error al sincronizar');
+  }
+}
+
+// Sincroniza a Drive automáticamente ~1.5s después de cada cambio
+function programarSync(){
+  if(!accessToken) return;
+  setSyncStatus('syncing', 'Guardando…');
+  clearTimeout(syncTimer);
+  syncTimer = setTimeout(async ()=>{
+    await guardarRespaldo(true);
+    setSyncStatus('ok', 'Sincronizado');
+  }, 1500);
+}
+
+// ---------- Init ----------
+// La app no carga datos ni se muestra hasta que haya sesión autorizada.
+</script>
+</body>
+</html>
