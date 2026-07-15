@@ -1134,6 +1134,7 @@ function mostrarPicker(){
     .addView(view)
     .setOAuthToken(accessToken)
     .setDeveloperKey(GOOGLE_API_KEY)
+    .setAppId(GOOGLE_CLIENT_ID.split('-')[0])
     .setOrigin(window.location.protocol + '//' + window.location.host)
     .setTitle('Selecciona el respaldo compartido (holus_prestamos_backup.json)')
     .setCallback(async (data)=>{
