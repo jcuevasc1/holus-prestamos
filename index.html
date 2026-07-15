@@ -1078,7 +1078,13 @@ async function cargarDesdeDriveId(fileId){
     const res = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
       headers: { Authorization: `Bearer ${accessToken}` }
     });
-    if(!res.ok) return false;
+    if(!res.ok){
+      let detalle = '';
+      try{ const errJson = await res.json(); detalle = errJson.error && errJson.error.message ? errJson.error.message : ''; }catch(e){}
+      console.error('Drive read error', res.status, detalle);
+      window.__ultimoErrorDrive = `HTTP ${res.status}${detalle ? ' — ' + detalle : ''}`;
+      return false;
+    }
     const json = await res.json();
     DATA = json && json.prestamos ? json : { prestamos: [] };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(DATA));
@@ -1087,6 +1093,7 @@ async function cargarDesdeDriveId(fileId){
     return true;
   }catch(e){
     console.error(e);
+    window.__ultimoErrorDrive = e.message || 'error de red';
     return false;
   }
 }
@@ -1127,6 +1134,7 @@ function mostrarPicker(){
     .addView(view)
     .setOAuthToken(accessToken)
     .setDeveloperKey(GOOGLE_API_KEY)
+    .setOrigin(window.location.protocol + '//' + window.location.host)
     .setTitle('Selecciona el respaldo compartido (holus_prestamos_backup.json)')
     .setCallback(async (data)=>{
       if(data.action === google.picker.Action.PICKED){
@@ -1138,8 +1146,9 @@ function mostrarPicker(){
           setSyncStatus('ok', 'Sincronizado');
           toast('Vinculado al respaldo compartido');
         } else {
+          const detalle = window.__ultimoErrorDrive || '';
           setSyncStatus('error', 'No se pudo leer ese archivo');
-          toast('No se pudo leer ese archivo');
+          toast('No se pudo leer ese archivo' + (detalle ? ' (' + detalle + ')' : ''));
           document.getElementById('linkGate').classList.add('show');
         }
       } else if(data.action === google.picker.Action.CANCEL){
