@@ -1097,6 +1097,7 @@ function mostrarVinculacionDrive(){
 }
 
 document.getElementById('btn-link-picker').addEventListener('click', ()=>{
+  document.getElementById('linkGate').classList.remove('show');
   cargarPicker(mostrarPicker);
 });
 document.getElementById('btn-link-crear').addEventListener('click', async ()=>{
@@ -1139,7 +1140,10 @@ function mostrarPicker(){
         } else {
           setSyncStatus('error', 'No se pudo leer ese archivo');
           toast('No se pudo leer ese archivo');
+          document.getElementById('linkGate').classList.add('show');
         }
+      } else if(data.action === google.picker.Action.CANCEL){
+        document.getElementById('linkGate').classList.add('show');
       }
     })
     .build();
